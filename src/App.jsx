@@ -6,16 +6,19 @@ import {io} from 'socket.io-client';
 function ChatMessage({ message, type }){
   return(
     <div className={`flex w-full ${
-      type == "send" ? "justfy-start" : "justify-end"}`}>
+      type === "send" ? "justify-start" : "justify-end"
+      }`}
+    >
       
-      {type == "send" ? (
+      {type === "send" ? (
         <div className="bg-violet-500 p-2 rounded-b-lg rounded-tr-lg text-white">`
-        {message}
+          {message}
         </div>
       ) : (
         <div className="bg-white p-2 rounded-b-lg rounded-tl-lg text-black">
           {message}
-          </div>
+        </div>
+      
       )}
 
     </div>
@@ -44,32 +47,33 @@ function App() {
 
     return () => newSocket.close();
 
-  }, [])
+  }, []);
 
   const sendMessage = () => {
       setMessages([ 
         ...messages, 
         {
-        type : "send",
+        type: "send",
         message: input_message,
         },
       ]);
-
-
     socket.emit("message", input_message);
 
-  }
-
-
+  };
+  
 
   return ( 
   <div className="p-5 h-screen bg-black">
     <div className="container mx-auto bg-gray-900 h-full flex flex-col">
       <div className="flex-grow p-3 flex flex-row items-end"> 
         <div className="w-full">
-          <ChatMessage type={"receive"} message={"Opa, beleza?"} />
-          <ChatMessage type={"send"} message={"Opa, beleza?"} />
-          <ChatMessage type={"receive"} message={"Opa, beleza?"} />
+          {messages.map( (message, index) => (
+            <ChatMessage
+              key={index}
+              message={message.message}
+              type={message.type}
+            />
+          ))}
         </div>
       </div>
       <div className="h-[100px] p-3 flex justify-center items-center bg-gray-700">
