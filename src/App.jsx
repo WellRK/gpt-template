@@ -20,9 +20,8 @@ function ChatMessage({ message, type }){
         </div>
       
       )}
-
     </div>
-  )
+  );
 }
 
 function App() {
@@ -40,7 +39,7 @@ function App() {
         ...messages, 
         {
         type : "receive",
-        message,
+        message: message.output,
         },
       ]);
     });
