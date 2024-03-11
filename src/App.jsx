@@ -16,7 +16,10 @@ function ChatMessage({ message, type }){
         </div>
       ) : (
         <div className="bg-white p-2 rounded-b-lg rounded-tl-lg text-black">
-          {message}
+          {message.split('*').map( (line, index) => (
+           <p key={index}>{line} </p> 
+            
+          ))}
         </div>
       
       )}
@@ -24,48 +27,43 @@ function ChatMessage({ message, type }){
   );
 }
 
+
+
+const newSocket = io("http://localhost:3000/");
 function App() {
  
-  const [socket, setSocket] = useState(null);
+  const [newSocket, setNewSocket] = useState(null);
   const [input_message, setInputMessage] = useState("");
-  const [messages, setMessages] = useState([]);
-
-  useEffect(() => {
-    const newSocket = io("http://localhost:3000/")
-    setSocket(newSocket);
-
-    newSocket.on("response", (message) => {
-      setMessages([ 
-        ...messages, 
-        {
-        type : "receive",
-        message: message.output,
-        },
-      ]);
-    });
-
-    return () => newSocket.close();
-
-  }, []);
-
-  const sendMessage = () => {
-      setMessages([ 
-        ...messages, 
-        {
-        type: "send",
-        message: input_message,
-        },
-      ]);
-    socket.emit("message", input_message);
-
-  };
+  const [messages, setMessages] = useState([{
+    type: "send",
+    message: "Bem vindo ao chatGPT!",
+  }]);
   
 
+  useEffect(() => {
+    const newSocket = io("http://localhost:3000/");
+    setNewSocket(newSocket);
+
+    newSocket.on("response", (message) => {   
+      setMessages( (prev) => [...prev, { type: "receive", message: message.output }] );
+    });  
+  }, []);
+
+ 
+  const sendMessage = () => {
+          
+    setMessages( (prev) => [...prev, { type:"send", message: input_message}] );
+      setInputMessage("");
+      newSocket.emit("message", input_message);
+
+  };
+
+  
   return ( 
   <div className="p-5 h-screen bg-black">
     <div className="container mx-auto bg-gray-900 h-full flex flex-col">
       <div className="flex-grow p-3 flex flex-row items-end"> 
-        <div className="w-full">
+        <div className="w-full space-y-3 overflow-scroll h-[80vh]">
           {messages.map( (message, index) => (
             <ChatMessage
               key={index}
@@ -77,6 +75,12 @@ function App() {
       </div>
       <div className="h-[100px] p-3 flex justify-center items-center bg-gray-700">
         <input 
+          onKeyDown={(e) =>{
+            if (e.key === "Enter") {
+              sendMessage();
+            }
+          }}
+
           value={input_message}
           onChange={(e) => setInputMessage(e.target.value)}
 
